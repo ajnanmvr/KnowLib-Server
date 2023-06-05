@@ -7,9 +7,10 @@ const app = express();
 
 require("dotenv").config();
 app.use(cors({
-  origin: '*',
+  origin: ['http://localhost:3000', 'https://knowlib.vercel.app/'],
   credentials: true
 }));
+
 const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 mongoose.set("strictQuery", false);
