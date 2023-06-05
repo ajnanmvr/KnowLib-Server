@@ -17,7 +17,9 @@ exports.createData = (req, res) => {
 exports.getAllData = (req, res) => {
   DataModel.find()
     .then((data) => {
-      res.json(data);
+      res.json({
+        count:data.length,
+        data});
     })
     .catch((error) => {
       res.status(500).json({ error: error.message });
