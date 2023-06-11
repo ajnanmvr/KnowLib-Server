@@ -7,6 +7,6 @@ const dataSchema = new mongoose.Schema({
   url: { type: String, required: true, unique: true }
 });
 
-const DataModel = mongoose.model('DataModel', dataSchema);
+const DataModel = mongoose.model('WebSites', dataSchema);
 
 module.exports = DataModel;
