@@ -73,10 +73,6 @@ exports.deleteData = (req, res) => {
       res.status(500).json({ error: error.message });
     });
 };
-
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
-
 exports.adminLogin = (req, res) => {
   const { username, password } = req.body;
 
