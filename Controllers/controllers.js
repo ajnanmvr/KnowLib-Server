@@ -74,6 +74,9 @@ exports.deleteData = (req, res) => {
     });
 };
 
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+
 exports.adminLogin = (req, res) => {
   const { username, password } = req.body;
 
@@ -94,19 +97,23 @@ exports.adminLogin = (req, res) => {
           return res.status(401).json({ error: 'Invalid username or password' });
         }
 
-        // Generate a JWT token with a secret key from the environment variable
+        // Generate a JWT token with a secret key from the environment variable and expiration time
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
-          expiresIn: '24h', // Token expires in 1 hour
+          expiresIn: '24h', // Token expires in 24 hours
         });
 
-        // Send the token in the response
-        res.status(200).json({ token });
+        // Send the token in a cookie with an expiration time
+        res.cookie('token', token, { expires: new Date(Date.now() + 24 * 60 * 60 * 1000), httpOnly: true });
+
+        // Send a success response
+        res.status(200).json({ status: 'success' });
       });
     })
     .catch((error) => {
       res.status(500).json({ error: 'Internal server error' });
     });
 };
+
 
 
 exports.adminSignup = (req, res) => {
