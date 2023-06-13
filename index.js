@@ -48,6 +48,7 @@ app.put("/data/:id", controllers.updateData);
 // Delete a data model by ID
 app.delete("/data/:id", controllers.deleteData);
 app.post("/login", controllers.adminLogin);
+app.post("/register", controllers.adminSignup);
 
 // Start the server
 app.listen(port, () => {

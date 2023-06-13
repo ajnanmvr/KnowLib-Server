@@ -1,4 +1,7 @@
 const DataModel = require('../Models/dataModel');
+const User = require('../Models/usermodel');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 // Create a new data model
 exports.createData = (req, res) => {
@@ -74,26 +77,70 @@ exports.deleteData = (req, res) => {
 exports.adminLogin = (req, res) => {
   const { username, password } = req.body;
 
-  // Check if username and password are valid
-  if (username === "admin" && password === "dhiucmd") {
-    // Admin login successful
-    res.json({ message: "Admin login successful" });
-  } else {
-    // Invalid credentials
-    res.status(401).json({ error: "Invalid credentials" });
-  }
+  // Find the user by username in the database
+  User.findOne({ username })
+    .then((user) => {
+      if (!user) {
+        return res.status(401).json({ error: 'Invalid username or password' });
+      }
+
+      // Compare the provided password with the stored hashed password
+      bcrypt.compare(password, user.password, (err, result) => {
+        if (err) {
+          return res.status(500).json({ error: 'Internal server error' });
+        }
+
+        if (!result) {
+          return res.status(401).json({ error: 'Invalid username or password' });
+        }
+
+        // Generate a JWT token with a secret key from the environment variable
+        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
+          expiresIn: '24h', // Token expires in 1 hour
+        });
+
+        // Send the token in the response
+        res.status(200).json({ token });
+      });
+    })
+    .catch((error) => {
+      res.status(500).json({ error: 'Internal server error' });
+    });
 };
 
-exports.adminLogin = (req, res) => {
+
+exports.adminSignup = (req, res) => {
   const { username, password } = req.body;
 
-  // Check if username and password are valid
-  if (username === "admin" && password === "dhiucmd") {
-    // Admin login successful
-    res.json({ message: "Admin login successful" });
-  } else {
-    // Invalid credentials
-    res.status(401).json({ error: "Invalid credentials" });
-  }
+  // Check if user with the same username already exists
+  User.findOne({ username })
+    .then(existingUser => {
+      if (existingUser) {
+        return res.status(400).json({ error: 'User already exists' });
+      }
+
+      // Generate a hash of the password using bcrypt
+      bcrypt.hash(password, 10, (err, hashedPassword) => {
+        if (err) {
+          return res.status(500).json({ error: 'Internal server error' });
+        }
+
+        // Create a new user object
+        const newUser = new User({ username, password: hashedPassword });
+
+        // Save the new user to the database
+        newUser.save()
+          .then(() => {
+            // Send a success response
+            res.status(201).json({ message: 'User created successfully' });
+          })
+          .catch(error => {
+            res.status(500).json({ error: `Error saving user to the database ${error}` });
+          });
+      });
+    })
+    .catch(error => {
+      res.status(500).json({ error: 'Internal server error' });
+    });
 };
 
