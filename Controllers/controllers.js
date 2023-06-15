@@ -100,7 +100,7 @@ exports.adminLogin = (req, res) => {
         // Set the token as a cookie in the response
         res.cookie('login_token', token, {
           httpOnly: true,
-          // Add other desired cookie options (e.g., secure: true for HTTPS)
+          secure: true,
         });
 
         res.status(200).json({ message: 'Sign in successful' });
