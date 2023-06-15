@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const controllers = require("./Controllers/controllers");
 const cors = require("cors");
 const app = express();
+const cookieParser = require('cookie-parser')
 
 require("dotenv").config();
 app.use(cors({
@@ -13,6 +14,7 @@ app.use(cors({
 
 const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
+app.use(cookieParser());
 mongoose.set("strictQuery", false);
 
 // Connect to the MongoDB database

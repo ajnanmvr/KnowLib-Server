@@ -76,11 +76,11 @@ exports.deleteData = (req, res) => {
 exports.adminLogin = (req, res) => {
   const { username, password } = req.body;
 
-  // Find the user by username in the database
+  // Find the user by their username
   User.findOne({ username })
-    .then((user) => {
+    .then(user => {
       if (!user) {
-        return res.status(401).json({ error: 'Invalid username or password' });
+        return res.status(404).json({ error: 'User not found' });
       }
 
       // Compare the provided password with the stored hashed password
@@ -90,22 +90,23 @@ exports.adminLogin = (req, res) => {
         }
 
         if (!result) {
-          return res.status(401).json({ error: 'Invalid username or password' });
+          return res.status(401).json({ error: 'Invalid password' });
         }
 
-        // Generate a JWT token with a secret key from the environment variable and expiration time
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
-          expiresIn: '24h', // Token expires in 24 hours
+        // Authentication successful
+        // Generate a JWT token
+        const token = jwt.sign({ username: user.username }, process.env.JWT_SECRET_KEY);
+
+        // Set the token as a cookie in the response
+        res.cookie('login_token', token, {
+          httpOnly: true,
+          // Add other desired cookie options (e.g., secure: true for HTTPS)
         });
 
-        // Send the token in a cookie with an expiration time
-        res.cookie('token', token, { expires: new Date(Date.now() + 24 * 60 * 60 * 1000), httpOnly: true });
-
-        // Send a success response
-        res.status(200).json({ status: 'success' });
+        res.status(200).json({ message: 'Sign in successful' });
       });
     })
-    .catch((error) => {
+    .catch(error => {
       res.status(500).json({ error: 'Internal server error' });
     });
 };
