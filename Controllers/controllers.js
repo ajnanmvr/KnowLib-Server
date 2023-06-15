@@ -101,7 +101,6 @@ exports.adminLogin = (req, res) => {
         res.cookie('login_token', token, {
           httpOnly: true,
           secure: true,
-          domain: 'https://knowlib.vercel.app/admin/login',
         });
 
         res.status(200).json({ message: 'Sign in successful' });
