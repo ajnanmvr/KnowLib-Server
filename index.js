@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser')
 
 require("dotenv").config();
 app.use(cors({
-  origin: ['https://knowlib.vercel.app','http://localhost:3000', ],
+  origin: "*",
   credentials: true
 }));
 
