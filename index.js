@@ -13,7 +13,12 @@ const errorHandler = require("./utils/errorHandler");
 require("dotenv").config();
 app.use(
   cors({
-    origin: true,
+    origin: [
+      "https://knowlib.vercel.app",
+      "https://know-library-client-ajnanmvr.vercel.app/",
+      "https://know-library-client-git-main-ajnanmvr.vercel.app/",
+      "http://localhost:3000",
+    ],
     credentials: true,
   })
 );
@@ -41,7 +46,7 @@ app.get("/", (req, res) => {
   res.send("Welcome to the API homepage!");
 });
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', true);
+  res.header("Access-Control-Allow-Credentials", true);
   next();
 });
 // Create a new data model
