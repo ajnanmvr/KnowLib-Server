@@ -15,8 +15,8 @@ app.use(
   cors({
     origin: [
       "https://knowlib.vercel.app",
-      "https://know-library-client-ajnanmvr.vercel.app/",
-      "https://know-library-client-git-main-ajnanmvr.vercel.app/",
+      "https://know-lib-old-ajnanmvr.vercel.app/",
+      "https://know-lib-old-git-main-ajnanmvr.vercel.app/",
       "http://localhost:3000",
     ],
     credentials: true,
