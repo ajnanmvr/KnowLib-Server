@@ -1,25 +1,31 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const controllers = require("./Controllers/controllers");
 const cors = require("cors");
 const app = express();
-const cookieParser = require('cookie-parser')
+const cookieParser = require("cookie-parser");
+const dataRoute = require("./routes/dataRoute");
+const userRoute = require("./routes/userRoute");
+const categoryRoute = require("./routes/categoryRoute");
+const morgan = require("morgan");
+const errorHandler = require("./utils/errorHandler");
 
 require("dotenv").config();
-app.use(cors({
-  origin: ['https://knowlib.vercel.app','https://know-library-client-ajnanmvr.vercel.app/','https://know-library-client-git-main-ajnanmvr.vercel.app/','http://localhost:3000', ],
-  credentials: true
-}));
-
-const port = process.env.PORT || 3000;
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
+app.use(morgan("dev"));
+const port = process.env.PORT || 5000;
 app.use(bodyParser.json());
 app.use(cookieParser());
 mongoose.set("strictQuery", false);
 
 // Connect to the MongoDB database
 mongoose
-  .connect(process.env.DB_URL, {
+  .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -34,23 +40,21 @@ mongoose
 app.get("/", (req, res) => {
   res.send("Welcome to the API homepage!");
 });
-
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', true);
+  next();
+});
 // Create a new data model
-app.post("/data", controllers.createData);
+app.use("/api/data", dataRoute);
+app.use("/api/user", userRoute);
+app.use("/api/category", categoryRoute);
+app.all("*", (req, res) => {
+  res.status(400).json({
+    error: `${req.originalUrl} [${req.method}] is not found in this server`,
+  });
+});
 
-// Read all data models
-app.get("/data", controllers.getAllData);
-
-// Read a single data model by ID
-app.get("/data/:id", controllers.getDataById);
-
-// Update a data model by ID
-app.put("/data/:id", controllers.updateData);
-
-// Delete a data model by ID
-app.delete("/data/:id", controllers.deleteData);
-app.post("/login", controllers.adminLogin);
-app.post("/register", controllers.adminSignup);
+app.use(errorHandler);
 
 // Start the server
 app.listen(port, () => {

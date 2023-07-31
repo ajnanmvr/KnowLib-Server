@@ -1,12 +1,36 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const dataSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  image: { type: String },
-  description: { type: String, required: true },
-  url: { type: String, required: true, unique: true }
+  name: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  url: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  category: {
+    type: mongoose.Types.ObjectId,
+    required: true,
+    ref: "Category",
+  },
+  published: {
+    type: Boolean,
+    default: false,
+  },
+},{
+  timestamps:true
 });
 
-const DataModel = mongoose.model('WebSites', dataSchema);
+dataSchema.pre("find", function(next) {
+  this.populate("category");
+  next();
+});
+const DataModel = mongoose.model("WebSites", dataSchema);
 
 module.exports = DataModel;
