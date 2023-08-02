@@ -3,8 +3,6 @@ const User = require("../Models/usermodel");
 
 exports.protect = (req, res, next) => {
   const token = req.header("Authorization") || req.cookies.login_token;
-  console.log(token);
-
   if (!token) {
     return res.status(401).json({ error: "Unauthorized: Token not found" });
   }

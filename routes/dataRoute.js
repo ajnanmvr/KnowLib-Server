@@ -2,17 +2,60 @@ const express = require("express");
 const router = express.Router();
 const DataModel = require("../Models/dataModel"); // Replace with the actual path to your DataModel file
 const { protect, isAdmin } = require("../utils/authMiddleware");
-const mongoose=require('mongoose')
+const mongoose = require("mongoose");
+const cloudinary = require("cloudinary").v2;
+const multer = require("multer");
+const dotenv = require("dotenv");
+dotenv.config();
+const storage = multer.diskStorage({
+  destination: "/tmp",
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage });
+
+cloudinary.config({
+  cloud_name: "df690pfy3",
+  api_key: "396969221864348",
+  api_secret: process.env.CLOUDINARY_SECRET,
+});
 
 // Create a new data model
-router.post("/", protect, isAdmin, async (req, res, next) => {
-  try {
-    const newData = await DataModel.create({ ...req.body, published: true });
-    res.status(201).json(newData);
-  } catch (error) {
-    next(error);
+router.post(
+  "/",
+  protect,
+  isAdmin,
+  upload.single("thumbnail"),
+  async (req, res, next) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "image not uploaded" });
+      }
+      let thumbnail = req.file.path;
+      const uploadResult = await cloudinary.uploader
+        .upload(thumbnail, {
+          folder: "posts",
+          width: 2400,
+          height: 1600,
+          crop: "limit",
+        })
+        .catch((err) => {
+          console.log("cloudinary error", err);
+        });
+
+      const newData = await DataModel.create({
+        ...req.body,
+        published: true,
+        thumbnail: uploadResult.secure_url,
+      });
+      res.status(201).json(newData);
+    } catch (error) {
+      next(error);
+    }
   }
-});
+);
 router.post("/suggest", async (req, res, next) => {
   try {
     const newData = await DataModel.create({ ...req.body });
